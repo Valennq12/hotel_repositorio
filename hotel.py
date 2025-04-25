@@ -140,84 +140,42 @@ class Hotel:
 
 
 def main():
-    print('>>> HOTEL PARFAIT. GESTIONES CLIENTES Y RESERVAS <<<')
-    menu = ['ALTA CLIENTES', 'BAJA CLIENTES', 'RESERVA HABITACION', 'CANCELAR RESERVA', 'LISTADO CLIENTES', 'LISTADO RESERVAS', 'SALIR']
-
+    print(">>> HOTEL PARFAIT <<<")
     while True:
-        for indice, elemento in enumerate(menu, strat=1) :
-            print(f'{indice}) {elemento}')
+        print("\n1) Alta Cliente\n2) Baja Cliente\n3) Reservar\n4) Cancelar Reserva\n5) Salir")
+        opcion = input("Elige una opción: ")
 
-        accion = input('Elige: ')
-        if not accion.isdigit() :
-            print('DEBES INTRODUCIR UN NUMERO (1-7)')
-            return False
+        if opcion == "1":
+            nombre = input("Nombre: ")
+            apellidos = input("Apellidos: ")
+            dni = input("DNI: ")
+            Hotel.dar_alta_cliente(Cliente(nombre, dni, apellidos))
+            print("Cliente añadido.")
         
-        match accion :
-            case '1':
-                #ALTA CLIENTES
-                nombre = input('Nombre: ')
-                dni = input('DNI: ')
-                apellidos = input('Apellidos: ')
-                datos_cliente = Cliente(nombre,dni,apellidos)
-                Hotel.dar_alta_cliente(datos_cliente)
-                print('Cliente añadido.\nBienvenido.')
-
-            case '2':
-                #BAJA CLIENTES con dni
-                dni = input('Nombre cliente: ')
-                for cliente in Hotel.clientes :
-                    if isinstance(dni, Cliente):
-                        Hotel.clientes.remove(cliente)
-                        print('Cliente borrado con éxito.')
-                
-            case '3':
-                #RESERVA HABITACION Para reservar una habitación se debe comprobar previamente su disponibilidad y disminuirla.
-                habitaciones = ['HABITACION SENCILLA', 'HABITACION DOBLE','HABITACION SUITE']
-                for indice, elemento in enumerate(habitaciones,start = 1):
-                    print(f'{indice}) {elemento}')
-
-                habitacion = int(input('Tipo de habitacion: '))
-                #VALIDAMOS SI HAY DISPONIBILIDAD
-                if habitacion == 1 :
-                    if Hotel.comprobar_disponibilidad(HabitacionesSencillas) :
-                        return True
-                    else:
-                        print('No hay disponibilidad para esta habitacion.')
-                        return False
-                elif habitacion == 2 :
-                    if Hotel.comprobar_disponibilidad(HabitacionesDobles) :
-                        return True
-                    else:
-                        print('No hay disponibilidad para esta habitacion.')
-                        return False
-                elif habitacion == 3:
-                    if Hotel.comprobar_disponibilidad(HabitacionesSuites) :
-                        return True
-                    else:
-                        print('No hay disponibilidad para esta habitacion.')
-                        return False
-                
-                nombre = input('Nombre cliente: ')
-                if Hotel.buscar_cliente_nombre(nombre):
-                    return True
-                else:
-                    print('Cliente no encontrado.')
-
-                fecha = input('Dime la fecha con el siguiente formato: DD/MM/YYYY: ')
+        elif opcion == "2":
+            dni = input("DNI del cliente a eliminar: ")
+            Hotel.eliminar_cliente(dni)
+            print("Cliente eliminado.")
+        
+        elif opcion == "3":
+            nombre = input("Nombre del cliente: ")
+            for idx, hab in Hotel.habitaciones.items():
+                print(f"{idx}) {hab}")
+            tipo = int(input("Selecciona tipo de habitación: "))
+            fecha = input("Fecha (DD/MM/YYYY): ")
+            n_personas = int(input("Número de personas: "))
+            Hotel.reservar(nombre, tipo, fecha, n_personas)
+        
+        elif opcion == "4":
+            nombre = input("Nombre del cliente: ")
+            Hotel.cancelar_reserva(nombre)
+            print("Reserva cancelada.")
+        
+        elif opcion == "5":
+            print("Saliendo...")
+            break
 
 
-            case '4':
-                #CANCELAR RESERVA
-                pass
-            case '5':
-                #LISTADO CLIENTES
-                pass
-            case '6':
-                #LISTADO RESERVAs
-                pass
-            case '7':
-                #SALIR
-                print('Saliendo...')
-                break
+main()
 
 
