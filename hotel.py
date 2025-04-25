@@ -19,126 +19,101 @@ oPara reservar una habitación se debe comprobar previamente su disponibilidad y
 oSe podrá cancelar una reserva buscando la misma por el nombre del cliente.'''
 from abc import ABC, abstractmethod
 
+# Clase abstracta
 class Habitacion(ABC):
-        
-
     @abstractmethod
-    def calcular_precio_habitacion(self):
+    def calcular_precio_habitacion(self, n_personas):
         pass
 
+# Clase concreta general para habitaciones
+class HabitacionConcreta(Habitacion):
+    def __init__(self, tipo, disponibilidad, precio_base, descuento):
+        self.tipo = tipo
+        self.disponibilidad = disponibilidad
+        self.precio_base = precio_base
+        self.descuento = descuento
 
-class HabitacionesSencillas(Habitacion):
-    disponibilidad = 3
-    PRECIO_BASE = 40
-    DESCUENTO = 5
+    def calcular_precio_habitacion(self, n_personas):
+        precio_total = self.precio_base * n_personas
+        precio_final = precio_total - (precio_total * self.descuento / 100)
+        return precio_final
 
+    def reservar(self):
+        if self.disponibilidad > 0:
+            self.disponibilidad -= 1
+            return True
+        return False
 
-class HabitacionesDobles(Habitacion):
-    disponibilidad = 2
-    PRECIO_BASE = 80
-    DESCUENTO = 10
+    def __str__(self):
+        return f"{self.tipo} - {self.disponibilidad} disponibles - Precio base: {self.precio_base}€"
 
-class HabitacionesSuites(Habitacion):
-    disponibilidad = 1
-    PRECIO_BASE = 100
-    DESCUENTO = 10
-
-class Cliente: 
-# -Cliente: de los cuales se guardará nombre, apellidos y DNI.
+# Clase Cliente
+class Cliente:
     def __init__(self, nombre, dni, apellidos):
         self.nombre = nombre
-        self.apellidos = apellidos 
-        self.dni = dni 
+        self.apellidos = apellidos
+        self.dni = dni
 
     def __str__(self):
         return f'DATOS CLIENTE:\nNombre: {self.nombre}\nApellidos: {self.apellidos}\nDNI: {self.dni}'
 
+# Clase Reserva
 class Reserva:
-    def __init__(self,cliente, habitacion, fecha):
+    def __init__(self, cliente, habitacion, fecha):
         self.cliente = cliente
         self.habitacion = habitacion
-        self.fecha = fecha 
+        self.fecha = fecha
 
     def __str__(self):
-        return f'DATOS RESERVA\n Cliente: {self.cliente}\nTipo de habitacion: {self.habitacion}\nFecha: {self.fecha}'
+        return f'DATOS RESERVA\n Cliente: {self.cliente.nombre}\nTipo de habitacion: {self.habitacion.tipo}\nFecha: {self.fecha}'
 
-
+# Clase Hotel
 class Hotel:
-#     -Hotel: Gestionará todas las operaciones relacionadas con las reservas. 
-# oSe guardarán de forma independiente una lista de clientes y de reservas. 
-# oSe debe poder dar de alta un cliente y eliminarlo
-# oSe debe poder dar de alta una reserva, que tendrá asociada un tipo de habitación, un cliente (aunque la puedan ocupar más) y una fecha.
-# oPara reservar una habitación se debe comprobar previamente su disponibilidad y disminuirla.
-# oSe podrá cancelar una reserva buscando la misma por el nombre del cliente.
     clientes = []
     reservas = []
+    habitaciones = {
+        1: HabitacionConcreta("SENCILLA", 3, 40, 5),
+        2: HabitacionConcreta("DOBLE", 2, 80, 10),
+        3: HabitacionConcreta("SUITE", 1, 100, 15),
+    }
 
     @staticmethod
     def buscar_cliente_nombre(nombre):
         for cliente in Hotel.clientes:
-            if cliente == nombre:
-                return True
-        return False
-
-    @staticmethod # oSe debe poder dar de alta un cliente y eliminarlo
-    def dar_alta_cliente(datos_cliente):
-        Hotel.clientes.append(datos_cliente)
-
-    @staticmethod # oSe debe poder dar de alta un cliente y eliminarlo
-    def eliminar_cliente(dni_cliente):
-        Hotel.clientes.remove(dni_cliente)
-
-    @staticmethod # oSe debe poder dar de alta una reserva, que tendrá asociada un tipo de habitación, un cliente (aunque la puedan ocupar más) y una fecha.
-    def reservar():
-        habitaciones = ['HABITACION SENCILLA', 'HABITACION DOBLE','HABITACION SUITE']
-        for indice, elemento in enumerate(habitaciones,start = 1):
-            print(f'{indice}) {elemento}')
-        habitacion = int(input('Tipo de habitacion: '))
-                #VALIDAMOS SI HAY DISPONIBILIDAD
-        if habitacion == 1 :
-            habitacion = HabitacionesSencillas
-            if Hotel.comprobar_disponibilidad(HabitacionesSencillas) :
-                return True
-            else:
-                print('No hay disponibilidad para esta habitacion.')
-                return False
-        elif habitacion == 2 :
-            habitacion = HabitacionesDobles
-            if Hotel.comprobar_disponibilidad(HabitacionesDobles) :
-                return True
-            else:
-                print('No hay disponibilidad para esta habitacion.')
-                return False
-        elif habitacion == 3:
-            habitacion = HabitacionesSuites
-            if Hotel.comprobar_disponibilidad(HabitacionesSuites) :
-                return True
-            else:
-                print('No hay disponibilidad para esta habitacion.')
-                return False
-        nombre = input('Nombre cliente: ')
-        if Hotel.buscar_cliente_nombre(nombre):
-            return True
-        else:
-            print('Cliente no encontrado.')
-            return False
-        fecha = input('Dime la fecha con el siguiente formato: DD/MM/YYYY: ')
-        n_personas = int(input('Numero de personas que la van a ocupar: '))
-        return Habitacion, 
-
+            if cliente.nombre == nombre:
+                return cliente
+        return None
 
     @staticmethod
-    def comprobar_disponibilidad(tipo_habitacion):
-        if tipo_habitacion.disponibilidad > 0 :
-            return True
-        else :
-            return False
+    def dar_alta_cliente(cliente):
+        Hotel.clientes.append(cliente)
 
-    @staticmethod # Se podrá cancelar una reserva buscando la misma por el nombre del cliente.
-    def cancelar_reserva():
-        pass
+    @staticmethod
+    def eliminar_cliente(dni):
+        Hotel.clientes = [c for c in Hotel.clientes if c.dni != dni]
 
+    @staticmethod
+    def reservar(nombre, tipo_hab, fecha, n_personas):
+        cliente = Hotel.buscar_cliente_nombre(nombre)
+        if not cliente:
+            print("Cliente no encontrado.")
+            return None
 
+        habitacion = Hotel.habitaciones.get(tipo_hab)
+        if not habitacion or not habitacion.reservar():
+            print("Habitación no disponible.")
+            return None
+
+        reserva = Reserva(cliente, habitacion, fecha)
+        Hotel.reservas.append(reserva)
+        print("Reserva realizada con éxito.")
+        return reserva
+
+    @staticmethod
+    def cancelar_reserva(nombre):
+        Hotel.reservas = [r for r in Hotel.reservas if r.cliente.nombre != nombre]
+
+# Main
 def main():
     print(">>> HOTEL PARFAIT <<<")
     while True:
@@ -175,7 +150,8 @@ def main():
             print("Saliendo...")
             break
 
+if __name__ == "__main__":
+    main()
 
-main()
 
 
